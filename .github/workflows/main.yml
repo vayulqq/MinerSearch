@@ -16,10 +16,9 @@ jobs:
 
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2 # Действие для настройки MSBuild
-      with:
-        # Можно указать конкретную версию Visual Studio или MSBuild, если необходимо
-        # vs-version: '[16.0,17.0)' # Например, для Visual Studio 2019
-        # msbuild-architecture: x64 # По умолчанию x86, можно указать x64
+      # Параметры 'vs-version' и 'msbuild-architecture' здесь не указаны,
+      # так как они необязательны и были закомментированы.
+      # Если они вам понадобятся, вы можете добавить блок 'with:' см. ниже.
 
     - name: Setup NuGet
       uses: NuGet/setup-nuget@v2 # Действие для настройки NuGet CLI
@@ -28,15 +27,12 @@ jobs:
 
     - name: Restore NuGet packages
       run: nuget restore MinerSearch.sln # Команда для восстановления пакетов для решения MinerSearch.sln
-                                         # Убедись, что MinerSearch.sln находится в корне репозитория
+                                         # Убедитесь, что MinerSearch.sln находится в корне репозитория
                                          # или укажи правильный путь к файлу .sln
 
     - name: Build the application
       run: msbuild MinerSearch.sln /p:Configuration=Release # Команда для сборки решения в конфигурации Release
                                                             # Замени MinerSearch.sln на имя твоего файла решения, если оно другое
-                                                            # Можно добавить другие параметры MSBuild, если нужно, например:
-                                                            # /p:Platform="Any CPU"
-                                                            # /p:TargetFrameworkVersion=v4.7.1 (хотя обычно это берется из файла проекта)
 
     # Опциональный шаг: публикация артефактов сборки (например, .exe файла)
     # - name: Upload build artifacts
