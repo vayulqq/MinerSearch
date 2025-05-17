@@ -25,8 +25,21 @@ jobs:
     - name: Restore NuGet packages
       run: nuget restore MinerSearch.sln
 
+    - name: Install TaskScheduler NuGet package
+      run: nuget install TaskScheduler -Version 2.11.0 -OutputDirectory packages
+      env:
+        NUGET: ${{ env.NUGET }}
+
+    - name: Check for ton_png.png
+      shell: pwsh
+      run: |
+        if (-not (Test-Path "MinerSearch/Resources/ton_png.png")) {
+          Write-Warning "Resource file ton_png.png is missing in MinerSearch/Resources/"
+          exit 1
+        }
+
     - name: Build solution
-      run: msbuild MinerSearch.sln /p:Configuration=Release /p:Platform="Any CPU"
+      run: msbuild MinerSearch.sln /p:Configuration=Release /p:Platform="Any CPU" /p:ReferencePath="packages/TaskScheduler.2.11.0/lib/net452"
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
