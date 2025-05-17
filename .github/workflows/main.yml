@@ -1,44 +1,33 @@
-name: Build MinerSearch
+name: Build MinerSearch Solution
 
 on:
   push:
-    branches: [ master ] # Запускать при push в ветку master
+    branches:
+      - main
   pull_request:
-    branches: [ master ] # Запускать также при pull request в ветку master
+    branches:
+      - main
 
 jobs:
   build:
-    runs-on: windows-latest # Использовать последнюю доступную среду Windows
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+        platform: [Any CPU, x64, x86]
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4 # Действие для загрузки кода репозитория
+      uses: actions/checkout@v4
 
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v2 # Действие для настройки MSBuild
-      # Параметры 'vs-version' и 'msbuild-architecture' здесь не указаны,
-      # так как они необязательны и были закомментированы.
-      # Если они вам понадобятся, вы можете добавить блок 'with:' см. ниже.
-
-    - name: Setup NuGet
-      uses: NuGet/setup-nuget@v2 # Действие для настройки NuGet CLI
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
       with:
-        nuget-version: 'latest' # Использовать последнюю версию NuGet
+        dotnet-version: '8.0.x' # Adjust based on project requirements
 
     - name: Restore NuGet packages
-      run: nuget restore MinerSearch.sln # Команда для восстановления пакетов для решения MinerSearch.sln
-                                         # Убедитесь, что MinerSearch.sln находится в корне репозитория
-                                         # или укажи правильный путь к файлу .sln
+      run: dotnet restore MinerSearch.sln
 
-    - name: Build the application
-      run: msbuild MinerSearch.sln /p:Configuration=Release # Команда для сборки решения в конфигурации Release
-                                                            # Замени MinerSearch.sln на имя твоего файла решения, если оно другое
-
-    # Опциональный шаг: публикация артефактов сборки (например, .exe файла)
-    # - name: Upload build artifacts
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: MinerSearch-Build
-    #     path: | # Укажи путь к выходным файлам сборки
-    #       MinerSearch/bin/Release/MinerSearch.exe
-    #       # Добавь другие файлы или папки, если необходимо
+    - name: Build solution
+      run: dotnet build MinerSearch.sln --configuration ${{ matrix.configuration }} --no-restore -p:Platform="${{ matrix.platform }}"
